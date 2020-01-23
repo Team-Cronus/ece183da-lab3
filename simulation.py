@@ -6,23 +6,26 @@ import matplotlib.pyplot as plt
 
 l1 = 2 #2cm from the center of rotation to the laser-y (change with measurements!)
 l2 = 2 #2cm from the center of rotation to the laser-x (change with measurements!)
-XMAX = 50 #50cm to signify the largest x value and the dimension of box
-YMAX = 50 #50cm to signify the largest x value and the dimension of box
+XMAX = 50 #30cm to signify the largest x value and the dimension of box
+YMAX = 50 #30cm to signify the largest x value and the dimension of box
 #initializing some global variables
 running = False                                 #running is false when no button is pressed, 
                                                 #   true when a button is pressed
 u = [[0.0],                                       #u vector holds our input values(left velocity, right velocity)
      [0.0]]
-t = 6                                           #t is a variable that holds a simulated time that considers
+t = .25                                          #t is a variable that holds a simulated time that considers
                                                 #   the time that a velocity is acting on a wheel
-dist_between_wheels = .010                      # 1cm, random value, will need to update later
+dist_between_wheels = .5                      # 1cm, random value, will need to update later
 X = [[0.0],[0.0],[0.0],[0.0],[0.0],[0.0]]       #X is a column vector [xb,yb,theta,x',y',theta']
 init_log_size = 500                             #initial size of the logging arrays
 xlog = [None]*init_log_size                     #create two arrays to store the values for state column vector 
                                                 #for logging and graphing purposes
 ylog = [None]*init_log_size                                       
 index = 0; #index for logging
-
+Z = [[0.0],                                     #Z is a column vector that holds the output values of the system
+     [0.0],                                     #output values: distance from lazer1, lazer2, angle from magnometer
+     [0.0]]
+v = 1.25                                         #v is the speed of the wheels in cm/s
 #initializes the starting point of the robot where (0,0) is the bottom left corner
 def initialize():
     global X
@@ -69,16 +72,16 @@ def state_update():
     Bu = np.reshape(np.matmul(B,u),(6,1))                                   #compute the value of B*u for state update
     Ax = np.matmul(A,X)                                                     #compute value of A*x for state update
     X = np.add(Ax,Bu)
-    X[5][0] = math.degrees(X[5][0])                                             #convert angular velocity for easier reading
+    X[5][0] = math.degrees(X[5][0])                                         #convert angular velocity for easier reading
     X[2][0] = math.degrees(X[2][0])
-    #TODO: add on the output model
-    #for ele in Bu:
-    #    print('eleBu: ', ele)
-    #for ele in Ax:
-    #    print('eleAx: ', ele)
-    for ele in X:
-        print('eleX: ', ele)
+    if X[2][0] <= 0:                                                    #keeps the angle constrained between 0 and 360
+        X[2][0] += 360.0
+    elif X[2][0] >= 360.0:
+        X[2][0] -= 360.0
+    #for ele in X:
+    #    print('eleX: ', ele)
     #logging and graphing 
+    print('xp: ', X[0][0],' yp: ', X[1][0], 'theta: ', X[2][0], 'theta\': ', X[5][0])
     xlog[index] = X[0][0]
     ylog[index] = X[1][0]
     line.set_marker(marker=(3,0,X[2][0]+10))
@@ -87,62 +90,80 @@ def state_update():
     fig.canvas.draw()
     index +=1
 
-def check_angle():
+#getD is a function that first checks for the correct wall that the laser sensors
+#will be hitting. It does this based on the known position,angle, and the min and max
+#values of the x and y coordinates. More about this wall checking is in the report
+#once we can distinguish which wall we are pointing towards(for both lasers),
+#we then calculate the distance from the car to the wall using simple geometry
+def getD():
     global X
+    D1 = 0.0
+    D2 = 0.0
+    rad = math.radians(X[2][0])
+    #if the angle between the car and the magnetometer is between certain angles,
+    #it has the ability to hit two different walls. We can check using the following calculation
+    #more about the calculation will be on the report
     if X[2][0] < 90 and X[2][0] > 0:
-        if math.atan2((YMAX-X[1][0])/(XMAX-X[0][0])) < X[2][0]:
-            USEYMAX1 = True
+        #Calculate D1, the distance from the laser in front of the car to the wall
+        if math.atan2((YMAX-X[1][0]),(XMAX-X[0][0])) < rad:
+            D1 = (YMAX - X[1][0])/math.sin(rad) - l1
         else:
-            USEXMAX1 = True
-        if math.atan2((XMAX-X[1][0])/(X[1][0])) < (90-X[2][0]):
-            USEYMIN2 = True
+            D1 = (XMAX - X[0][0])/math.cos(rad) - l1
+        #Calculate D2, the distance from the laser on the right of the car to the wall
+        if math.atan2((XMAX-X[0][0]),(X[1][0])) < (math.pi/2-rad):
+            D2 = (XMAX - X[0][0])/math.sin(rad) - l2
         else:
-            USEXMAX2 = True
+            D2 = (-1 * X[1][0])/math.cos(rad) - l2
     elif X[2][0] < 180 and X[2][0] > 90:
-        if math.atan2((YMAX-X[1][0])/(X[0][0])) < (180 - X[2][0]):
-            USEYMAX1 = True
+        if math.atan2((YMAX-X[1][0]),(X[0][0])) < (math.pi - rad):
+            D1 = (YMAX - X[1][0])/math.cos(rad - math.pi/2) - l1
         else:
-            USEXMIN1 = True
-        if math.atan2((YMAX-X[1][0])/(XMAX-X[0][0])) < (X[2][0]-90):
-            USEYMAX2 = True
+            D1 = (X[0][0])/math.sin(rad - math.pi/2)-l1
+        if math.atan2((YMAX-X[1][0]),(XMAX-X[0][0])) < (rad-math.pi/2):
+            D2 = (YMAX-X[1][0])/math.sin(rad - math.pi/2) - l2
         else:
-            USEXMAX2 = True
-        
+            D2 = (XMAX - X[0][0])/math.cos(rad - math.pi/2) - l2
     elif X[2][0] < 270 and X[2][0] > 180:
-        if math.atan2((X[1][0])/(X[0][0])) < (X[2][0]-180):
-            USEYMIN1 = True
+        if math.atan2((X[1][0]),(X[0][0])) < (rad-math.pi):
+            D1 = (X[1][0])/math.sin(rad - math.pi)-l1
         else:
-            USEXMIN1 = True
-        if math.atan2((YMAX-X[1][0])/(X[0][0])) < (270 - X[2][0]):
-            USEYMAX2 = True
+            D1 = (X[0][0])/math.cos(rad - math.pi)-l1
+        if math.atan2((YMAX-X[1][0]),(X[0][0])) < (3*math.pi/2 - rad):
+            D2 = (YMAX-X[1][0])/math.cos(rad - math.pi)-l2
         else:
-            USEXMIN2 = True
+            D2 = (X[0][0])/math.sin(rad - math.pi)-l2
     elif X[2][0] < 360 and X[2][0] > 270:
-        if math.atan2((XMAX-X[1][0])/(X[1][0])) < (360-X[2][0]):
-            USEYMIN1 = True
+        if math.atan2((X[1][0]),(XMAX - X[0][0])) < (2*math.pi-rad):
+            D1 = (X[1][0])/math.cos(2*math.pi - rad)-l1
         else:
-            USEXMAX1 = True
-        if math.atan2((X[1][0])/(X[0][0])) < (X[2][0]-270):
-            USEYMIN2 = True
+            D1 = (XMAX-X[0][0])/math.sin(2*math.pi - rad)-l1
+        if math.atan2((X[1][0]),(X[0][0])) < (rad - 3*math.pi/2):
+            D2 = (X[1][0])/math.sin(2*math.pi - rad)-l2
         else:
-            USEXMIN2 = True
+            D2 = (X[0][0])/math.cos(2*math.pi - rad)-l2
+    #if the angle is 90,180,270, or 0, we know which wall the lasers are sensing for sure
+    elif X[2][0] == 90:
+        D1 = YMAX - X[1][0]
+        D2 = XMAX - X[0][0]
+    elif X[2][0] == 180:
+        D1 = X[0][0]
+        D2 = YMAX - X[1][0]
+    elif X[2][0] == 270:
+        D1 = X[1][0]
+        D2 = XMAX - X[0][0]
+    elif X[2][0] == 0:
+        D1 = XMAX - X[0][0]
+        D2 = X[1][0]
+    return D1,D2
 
 ##output functions
 def output():
-    global X
-    check_angle()
-    if USEXMIN1:
-        D1 = (XMAX - X[0][0])/math.cos(math.radians(X[2][0])) -l1 #figure this out
-        D2 = (YMAX - X[1][0])/math.sin(math.radians(X[2][0])) -l2 #figure this out
-    #if X[2][0] < 180 and X[2][0] > 90:
-    #    D1 = 1 #figure this out
-    #    D2 = 1 #figure this out
-    #if X[2][0] < 270 and X[2][0] > 180:
-    #    D1 = 1 #figure this out
-    #    D2 = 1 #figure this out
-    #if X[2][0] < 360 and X[2][0] > 270:
-    #    D1 = 1 #figure this out
-    #    D2 = 1 #figure this out
+    global Z
+    Z[0][0],Z[1][0] = getD()
+    Z[2][0] = X[2][0]
+
+    
+    print('LzF: ', Z[0][0], ' LzR: ', Z[1][0], 'theta: ',Z[2][0])
 
 
 #driving imitation implementation
@@ -155,18 +176,19 @@ def drive(left, right):
     u[0] = left
     u[1] = right
     state_update()
+    output()
 
 def forward(event):
-    drive(1.0,1.0)                              #.01 meters per second speed, will need to update
+    drive(v,v)                              #.01 meters per second speed, will need to update
     print('forward')
 def left(event):
-    drive(-1.0,1.0) 
+    drive(-1*v,v) 
     print('left')
 def right(event):
-    drive(1.0,-1.0) 
+    drive(v,-1*v) 
     print('right')
 def backward(event):
-    drive(-1.0,-1.0)
+    drive(-1*v,-1*v)
     print('backward')
 def stop(event):
     drive(0,0)
@@ -174,10 +196,10 @@ def stop(event):
 
 #function to handle when a button is released
 def button_release(event):
-    global t
-    #global running
-    #running = False
-    print('hello')
+    #global t
+    global running
+    running = False
+    #print('hello')
 
 #creating a gui for controlling the car using tkinter
 window = tkinter.Tk()
