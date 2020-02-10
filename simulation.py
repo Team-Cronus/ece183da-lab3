@@ -3,7 +3,9 @@ import math
 import time as t1
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
+STOP = False
 l1 = 2 #2cm from the center of rotation to the laser-y (change with measurements!)
 l2 = 2 #2cm from the center of rotation to the laser-x (change with measurements!)
 XMAX = 50 #30cm to signify the largest x value and the dimension of box
@@ -29,10 +31,14 @@ v = 1.25                                         #v is the speed of the wheels i
 #initializes the starting point of the robot where (0,0) is the bottom left corner
 def initialize():
     global X
+    #TODO: change inputs to be adaptable as a child process
     #gather initial inputs to realize where the car is
-    xb = float(input('Enter initial x position: '))
-    yb = float(input('Enter initial y position: '))
-    theta = float(input('Enter initial angle: '))
+    #xb = float(sys.stdin.read('Enter initial x position: '))
+    #yb = float(sys.stdin.read('Enter initial y position: '))
+    #theta = float(sys.stdin.read('Enter initial angle: '))
+    xb = float(sys.stdin.read())
+    yb = float(sys.stdin.read())
+    theta = float(sys.stdin.read())
     X = [[xb],[yb],[theta],[0.0],[0.0],[0.0]]
     for ele in X:
         print('eleX: ', ele)
@@ -180,11 +186,13 @@ bw.bind('<ButtonRelease-1>', button_release)
 sp = tkinter.Button (window,text='stop')
 sp.bind('<ButtonPress-1>', stop)
 sp.bind('<ButtonRelease-1>', button_release)
+ex = tkinter.Button (window,text='Exit', command=window.destroy)
+
 fd.grid(column=5,row=0)
 rt.grid(column=6,row=1)
 lt.grid(column=4,row=1)
 bw.grid(column=5,row=2)
 sp.grid(column=5,row=1)
-
+ex.grid(column=8,row=1)
 
 window.mainloop()

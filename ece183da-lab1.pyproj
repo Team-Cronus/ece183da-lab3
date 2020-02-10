@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>23405dce-b49b-4686-8502-f98b42edf366</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>simulation.py</StartupFile>
+    <StartupFile>bigboy.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

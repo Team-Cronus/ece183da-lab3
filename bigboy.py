@@ -1,3 +1,10 @@
+import subprocess
+#import simulation
 
 print("BIG BOY RUNNING")
-run(['simulation.py'], capture_output = True)
+proc1 = subprocess.Popen('simulation.py', stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+                         shell=True, bufsize=1)
+
+inp = proc1.stdout.readline()
+
+print(inp)
