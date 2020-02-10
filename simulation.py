@@ -13,9 +13,9 @@ running = False                                 #running is false when no button
                                                 #   true when a button is pressed
 u = [[0.0],                                       #u vector holds our input values(left velocity, right velocity)
      [0.0]]
-t = .25                                          #t is a variable that holds a simulated time that considers
+t = .25                                         #t is a variable that holds a simulated time that considers
                                                 #   the time that a velocity is acting on a wheel
-dist_between_wheels = .5                      # 1cm, random value, will need to update later
+dist_between_wheels = .5                        # 1cm, random value, will need to update later
 X = [[0.0],[0.0],[0.0],[0.0],[0.0],[0.0]]       #X is a column vector [xb,yb,theta,x',y',theta']
 init_log_size = 500                             #initial size of the logging arrays
 xlog = [None]*init_log_size                     #create two arrays to store the values for state column vector 
@@ -78,9 +78,7 @@ def state_update():
         X[2][0] += 360.0
     elif X[2][0] >= 360.0:
         X[2][0] -= 360.0
-    #for ele in X:
-    #    print('eleX: ', ele)
-    #logging and graphing 
+
     print('xp: ', X[0][0],' yp: ', X[1][0], 'theta: ', X[2][0], 'theta\': ', X[5][0])
     xlog[index] = X[0][0]
     ylog[index] = X[1][0]
@@ -97,64 +95,26 @@ def state_update():
 #we then calculate the distance from the car to the wall using simple geometry
 def getD():
     global X
-    D1 = 0.0
-    D2 = 0.0
+    s1 = 0.0
+    s2 = 0.0
     rad = math.radians(X[2][0])
-    #if the angle between the car and the magnetometer is between certain angles,
-    #it has the ability to hit two different walls. We can check using the following calculation
-    #more about the calculation will be on the report
-    if X[2][0] < 90 and X[2][0] > 0:
-        #Calculate D1, the distance from the laser in front of the car to the wall
-        if math.atan2((YMAX-X[1][0]),(XMAX-X[0][0])) < rad:
-            D1 = (YMAX - X[1][0])/math.sin(rad) - l1
-        else:
-            D1 = (XMAX - X[0][0])/math.cos(rad) - l1
-        #Calculate D2, the distance from the laser on the right of the car to the wall
-        if math.atan2((XMAX-X[0][0]),(X[1][0])) < (math.pi/2-rad):
-            D2 = (XMAX - X[0][0])/math.sin(rad) - l2
-        else:
-            D2 = (-1 * X[1][0])/math.cos(rad) - l2
-    elif X[2][0] < 180 and X[2][0] > 90:
-        if math.atan2((YMAX-X[1][0]),(X[0][0])) < (math.pi - rad):
-            D1 = (YMAX - X[1][0])/math.cos(rad - math.pi/2) - l1
-        else:
-            D1 = (X[0][0])/math.sin(rad - math.pi/2)-l1
-        if math.atan2((YMAX-X[1][0]),(XMAX-X[0][0])) < (rad-math.pi/2):
-            D2 = (YMAX-X[1][0])/math.sin(rad - math.pi/2) - l2
-        else:
-            D2 = (XMAX - X[0][0])/math.cos(rad - math.pi/2) - l2
-    elif X[2][0] < 270 and X[2][0] > 180:
-        if math.atan2((X[1][0]),(X[0][0])) < (rad-math.pi):
-            D1 = (X[1][0])/math.sin(rad - math.pi)-l1
-        else:
-            D1 = (X[0][0])/math.cos(rad - math.pi)-l1
-        if math.atan2((YMAX-X[1][0]),(X[0][0])) < (3*math.pi/2 - rad):
-            D2 = (YMAX-X[1][0])/math.cos(rad - math.pi)-l2
-        else:
-            D2 = (X[0][0])/math.sin(rad - math.pi)-l2
-    elif X[2][0] < 360 and X[2][0] > 270:
-        if math.atan2((X[1][0]),(XMAX - X[0][0])) < (2*math.pi-rad):
-            D1 = (X[1][0])/math.cos(2*math.pi - rad)-l1
-        else:
-            D1 = (XMAX-X[0][0])/math.sin(2*math.pi - rad)-l1
-        if math.atan2((X[1][0]),(X[0][0])) < (rad - 3*math.pi/2):
-            D2 = (X[1][0])/math.sin(2*math.pi - rad)-l2
-        else:
-            D2 = (X[0][0])/math.cos(2*math.pi - rad)-l2
-    #if the angle is 90,180,270, or 0, we know which wall the lasers are sensing for sure
-    elif X[2][0] == 90:
-        D1 = YMAX - X[1][0]
-        D2 = XMAX - X[0][0]
-    elif X[2][0] == 180:
-        D1 = X[0][0]
-        D2 = YMAX - X[1][0]
-    elif X[2][0] == 270:
-        D1 = X[1][0]
-        D2 = XMAX - X[0][0]
-    elif X[2][0] == 0:
-        D1 = XMAX - X[0][0]
-        D2 = X[1][0]
-    return D1,D2
+    
+    #calculating possible distances for front sensor
+    d1 = (XMAX - X[0][0]) / math.cos(rad)
+    d2 = (YMAX - X[1][0]) / math.sin(rad)
+    d3 = X[0][0] / math.cos(rad + math.pi)
+    d4 = X[1][0] / math.sin(rad + math.pi)
+    #calculating possible distances for right sensor
+    l1 = (XMAX - X[0][0]) / math.sin(rad)
+    l2 = (YMAX - X[1][0]) / math.cos(rad + math.pi)
+    l3 = X[0][0] / math.sin(rad + math.pi)
+    l4 = X[1][0] / math.cos(rad)
+
+    #get minimum of the lengths, need to go back and view this
+    s1 = min(d1,d2,d3,d4)
+    s2 = min(l1,l2,l3,l4)
+        
+    return s1,s2
 
 ##output functions
 def output():
@@ -162,7 +122,7 @@ def output():
     Z[0][0],Z[1][0] = getD()
     Z[2][0] = X[2][0]
 
-    
+    #TODO: adjust for outputs to another program, maybe as a csv?
     print('LzF: ', Z[0][0], ' LzR: ', Z[1][0], 'theta: ',Z[2][0])
 
 
@@ -177,7 +137,7 @@ def drive(left, right):
     u[1] = right
     state_update()
     output()
-
+#TODO: Adjust for output to another program (csv maybe?)
 def forward(event):
     drive(v,v)                              #.01 meters per second speed, will need to update
     print('forward')
