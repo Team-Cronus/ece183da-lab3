@@ -6,3 +6,5 @@ seperate folders to maintain neatness and order. We also seperate some data into
 program but it currently does nothing atm and is there for future development as a program to redirect inputs and outputs between
 state estimator and simulation and possibly the arduino as well. 
 
+there are also visual studios files that can be ignored. They are simply there as we used visual studios as a text editor for
+editing files and coding programs.
