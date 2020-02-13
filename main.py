@@ -1,10 +1,12 @@
 import subprocess
 import time
+import os
 
+dir = os.getcwd()
 #opens subprocess simulation
 proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, bufsize=1, 
-                         encoding='ascii')#, shell=True)
+                         encoding='ascii', cwd=(dir+'\\simulation\\'))#, shell=True)
 
 #TODOs
 #open communications for arduino
