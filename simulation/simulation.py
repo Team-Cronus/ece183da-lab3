@@ -34,10 +34,13 @@ def initialize():
     #TODO: change inputs to be adaptable as a child process
     #gather initial inputs to realize where the car is
     print('Enter initial x position: ')
+    sys.stdout.flush()
     xb = float(input())
     print('Enter initial y position: ')
+    sys.stdout.flush()
     yb = float(input())
     print('Enter initial theta position: ')
+    sys.stdout.flush()
     theta = float(input())
 
     #xb = float(sys.stdin.read())
@@ -127,6 +130,7 @@ def output():
 def drive(left, right, cmd):
     global u     #updates velocity of wheels
     global X,xlog,ylog,index    #updates graph
+    global Z
     #global running                              #indicates that car is running
     #running = True
     print("Input: ", cmd, left, right)
@@ -143,6 +147,16 @@ def drive(left, right, cmd):
     line.set_ydata(ylog)
     fig.canvas.draw()
     index += 1
+    #log into file into csv
+    #outputs: laser1, laser 2, angle
+    f1.write(str(Z[0][0])+","+str(X[1][0])+","+str(X[2][0])+"\n")
+    #inputs: vl, vr
+    f2.write(str(u[0])+","+str(u[1])+"\n")
+    #ideal state:
+    f3.write(str(X[0][0])+","+str(X[1][0])+","+str(X[2][0])+"\n")
+
+
+
     
 
 #TODO: Adjust for output to another program (csv maybe?)
@@ -167,6 +181,10 @@ def button_release(event):
 #prompt for starting positions
 initialize()
 
+#create file to log data
+f1 = open('sim_out.txt','w')
+f2 = open('sim_in.txt','w')
+f3 = open('sim_st.txt','w')
 #creating a gui for controlling the car using tkinter
 window = tkinter.Tk()
 window.title("Robot GUI")

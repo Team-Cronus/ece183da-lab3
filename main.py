@@ -2,7 +2,7 @@ import subprocess
 import time
 
 #opens subprocess simulation
-proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE, 
+proc1 = subprocess.Popen(['python3','module1.py'], stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, bufsize=1, 
                          encoding='ascii')#, shell=True)
 
@@ -15,7 +15,8 @@ proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE,
 #       then send it into matlab program and also get matlab output
 #TODO: make option to get data from arduino
 
-while proc1.poll() is None: #and proc2.poll() is None
+while proc1.poll() is None: 
+    #and proc2.poll() is None
  
     sim_output = proc1.stdout.readline()        #gets stdout from simulation
     if proc1.poll() is not None: #sim_output == '' 
