@@ -1,8 +1,8 @@
 %the length of the box unit is cm
 t=1;
-L=50;
-W=50;
-widthdistance=.5;
+L=26;
+W=26;
+widthdistance=8.4;
 
 %initial state x=[x,y,theta,xdot,ydot,thetadot]
 x0=input('initial x  ');
@@ -31,7 +31,7 @@ inputUk=[pwmL;pwmR]; %U_k
 A=[1 0 0 t 0 0;0 1 0 0 t 0; 0 0 1 0 0 t; 0 0 0 0 0 0; 0 0 0 0 0 0;0 0 0 0 0 0];
 B=[0 0;0 0;0 0;0.5*cos(angled) 0.5*cos(angled);0.5*sin(angled) 0.5*sin(angled);-0.5*widthdistance -0.5*widthdistance];
 P_kminus1=[0 0 0 0 0 0;0 0 0 0 0 0;0 0 0 0 0 0;0 0 0 0 0 0;0 0 0 0 0 0;0 0 0 0 0 0];
-Q=[2 0 0 0 0 0; 0 2 0 0 0 0;0 0 2 0 0 0;0 0 0 2 0 0; 0 0 0 0 2 0;0 0 0 0 0 2];
+Q=[0.0921 0 0 0 0 0; 0 0.2509 0 0 0 0;0 0 0.0054 0 0 0;0 0 0 0.0245 0 0; 0 0 0 0 0.1904 0;0 0 0 0 0 0.000387];
 
 %predict function
 X_k_minus=A*xk_minus1 +B*inputUk;
@@ -84,7 +84,7 @@ end
 C=H1+H2 +[0 0 0 0 0 0;0 0 0 0 0 0;0 0 1 0 0 0];
 
 %update session
-R=[1 0 0;0 1 0;0 0 1];
+R=[0.3909 0 0;0 0.4664 0;0 0 0.001749];
 K_k = P_k_minus*transpose(C)*pinv(C*P_k_minus*transpose(C)+R);
 I = [1 0 0 0 0 0;0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1];
 

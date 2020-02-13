@@ -2,7 +2,7 @@ import subprocess
 import time
 
 #opens subprocess simulation
-proc1 = subprocess.Popen(['python3','module1.py'], stdin=subprocess.PIPE, 
+proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, bufsize=1, 
                          encoding='ascii')#, shell=True)
 
