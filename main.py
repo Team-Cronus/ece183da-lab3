@@ -1,16 +1,13 @@
 import subprocess
 import time
-#import simulation
 
-print("BIG BOY RUNNING")
-proc1 = subprocess.Popen(['python3','./simulation/simulation.py'], stdin=subprocess.PIPE, 
+#opens subprocess simulation
+proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, bufsize=1, 
                          encoding='ascii')#, shell=True)
 
+#TODOs
 #open communications for arduino
-
-
-
 #open subprocess for matlab program
 #proc3 = subprocess.Popen(matlab, stdin-subprocess.PIPE, stdout=subprocess.PIPE,bufsize=1,encoding='ascii')
 
@@ -19,10 +16,11 @@ proc1 = subprocess.Popen(['python3','./simulation/simulation.py'], stdin=subproc
 #TODO: make option to get data from arduino
 
 while proc1.poll() is None: #and proc2.poll() is None
+ 
+    sim_output = proc1.stdout.readline()        #gets stdout from simulation
     if proc1.poll() is not None: #sim_output == '' 
         #print(proc1.poll())
         break
-    sim_output = proc1.stdout.readline()        #gets stdout from simulation
     #ar_output = askdjfh from arduino
     #SE_output = proc3.stdout.readline()        #gets stdout from state estimator
     if sim_output:
@@ -45,12 +43,4 @@ while proc1.poll() is None: #and proc2.poll() is None
 
     #print(proc1.poll())
 print('end')
-#if proc1.poll() is not None:
 
-
-#for line in iter(proc1.stdout.readline, ''):
-    #print(line.decode())
-
-    #data = input()  
-    #proc1.stdin.write(str.encode(data))
-    #print('asdasd')

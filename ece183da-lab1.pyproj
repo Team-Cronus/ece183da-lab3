@@ -24,10 +24,7 @@
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="module1.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="simulation\simulation.py" />
+    <Compile Include="simulation.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="simulation\" />
