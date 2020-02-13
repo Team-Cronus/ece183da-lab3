@@ -3,7 +3,7 @@ import time
 #import simulation
 
 print("BIG BOY RUNNING")
-proc1 = subprocess.Popen(['python3','simulation.py'], stdin=subprocess.PIPE, 
+proc1 = subprocess.Popen(['python3','./simulation/simulation.py'], stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, bufsize=1, 
                          encoding='ascii')#, shell=True)
 
