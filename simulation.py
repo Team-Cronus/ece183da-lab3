@@ -33,34 +33,24 @@ def initialize():
     global X
     #TODO: change inputs to be adaptable as a child process
     #gather initial inputs to realize where the car is
-    #xb = float(sys.stdin.read('Enter initial x position: '))
-    #yb = float(sys.stdin.read('Enter initial y position: '))
-    #theta = float(sys.stdin.read('Enter initial angle: '))
-    xb = float(sys.stdin.read())
-    yb = float(sys.stdin.read())
-    theta = float(sys.stdin.read())
+    print('Enter initial x position: ')
+    xb = float(input())
+    print('Enter initial y position: ')
+    yb = float(input())
+    print('Enter initial theta position: ')
+    theta = float(input())
+
+    #xb = float(sys.stdin.read())
+    #yb = float(sys.stdin.read())
+    #theta = float(sys.stdin.read())
     X = [[xb],[yb],[theta],[0.0],[0.0],[0.0]]
-    for ele in X:
-        print('eleX: ', ele)
-
-initialize()
-
-
-#graphing setup             adapted from https://pythonspot.com/matplotlib-update-plot/
-plt.ion()
-fig = plt.figure()
-ax = fig.add_subplot(111)
-line, = ax.plot(xlog,ylog, marker=(3,0,X[2][0]))
-plt.xlabel('x(cm)')
-plt.ylabel('y(cm)')
-plt.title('State Estimation')
-plt.ylim(0,YMAX)                          #set the dimensions to be 0 to 50 cm
-plt.xlim(0,XMAX)
+    #for ele in X:
+     #   print('eleX: ', ele)
 
 
 def state_update():
     global X, u
-    global xlog, ylog, index
+    #global xlog, ylog, index
     X[2][0] = math.radians(X[2][0])
     X[5][0] = math.radians(X[5][0])
     A = [[1,0,0,t,0,0],                     #A is the state transition matrix that updates the x, y, and
@@ -86,13 +76,8 @@ def state_update():
         X[2][0] -= 360.0
 
     print('xp: ', X[0][0],' yp: ', X[1][0], 'theta: ', X[2][0], 'theta\': ', X[5][0])
-    xlog[index] = X[0][0]
-    ylog[index] = X[1][0]
-    line.set_marker(marker=(3,0,X[2][0]+10))
-    line.set_xdata(xlog)
-    line.set_ydata(ylog)
-    fig.canvas.draw()
-    index +=1
+    
+    #index +=1
 
 #getD is a function that first checks for the correct wall that the laser sensors
 #will be hitting. It does this based on the known position,angle, and the min and max
@@ -117,8 +102,10 @@ def getD():
     l4 = X[1][0] / math.cos(rad)
 
     #get minimum of the lengths, need to go back and view this
-    s1 = min(d1,d2,d3,d4)
-    s2 = min(l1,l2,l3,l4)
+    s1 = sorted([d1,d2,d3,d4])[2]
+    s2 = sorted([l1,l2,l3,l4])[2]
+    
+
         
     return s1,s2
 
@@ -129,36 +116,46 @@ def output():
     Z[2][0] = X[2][0]
 
     #TODO: adjust for outputs to another program, maybe as a csv?
-    print('LzF: ', Z[0][0], ' LzR: ', Z[1][0], 'theta: ',Z[2][0])
+    #prints Output: forward laser distance, right laser distance, angle reading
+    print('Output: ', Z[0][0], Z[1][0], Z[2][0])
+    sys.stdout.flush()
 
 
 #driving imitation implementation
 #left and write inputs are velocities of each wheel
 #drive function will update 
-def drive(left, right):
-    global u                                    #updates velocity of wheels
+def drive(left, right, cmd):
+    global u     #updates velocity of wheels
+    global X,xlog,ylog,index    #updates graph
     #global running                              #indicates that car is running
     #running = True
+    print("Input: ", cmd, left, right)
+    sys.stdout.flush()
     u[0] = left
     u[1] = right
+    
     state_update()
     output()
+    xlog[index] = X[0][0]
+    ylog[index] = X[1][0]
+    line.set_marker(marker=(3,0,X[2][0]+10))
+    line.set_xdata(xlog)
+    line.set_ydata(ylog)
+    fig.canvas.draw()
+    index += 1
+    
+
 #TODO: Adjust for output to another program (csv maybe?)
 def forward(event):
-    drive(v,v)                              #.01 meters per second speed, will need to update
-    print('forward')
+    drive(v,v, 'forward')                              #.01 meters per second speed, will need to update
 def left(event):
-    drive(-1*v,v) 
-    print('left')
+    drive(-1*v,v,'left') 
 def right(event):
-    drive(v,-1*v) 
-    print('right')
+    drive(v,-1*v,'right') 
 def backward(event):
-    drive(-1*v,-1*v)
-    print('backward')
+    drive(-1*v,-1*v,'reverse')
 def stop(event):
-    drive(0,0)
-    print('stop')
+    drive(0,0,'stop')
 
 #function to handle when a button is released
 def button_release(event):
@@ -166,6 +163,9 @@ def button_release(event):
     global running
     running = False
     #print('hello')
+
+#prompt for starting positions
+initialize()
 
 #creating a gui for controlling the car using tkinter
 window = tkinter.Tk()
@@ -195,4 +195,17 @@ bw.grid(column=5,row=2)
 sp.grid(column=5,row=1)
 ex.grid(column=8,row=1)
 
+#graphing setup             adapted from https://pythonspot.com/matplotlib-update-plot/
+plt.ion()
+fig = plt.figure()
+ax = fig.add_subplot(111)
+line, = ax.plot(xlog,ylog, marker=(3,0,X[2][0]))
+plt.xlabel('x(cm)')
+plt.ylabel('y(cm)')
+plt.title('State Estimation')
+plt.ylim(0,YMAX)                          #set the dimensions to be 0 to 50 cm
+plt.xlim(0,XMAX)
+
 window.mainloop()
+
+plt.close(fig)
