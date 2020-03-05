@@ -137,7 +137,7 @@ def output():
 #drive function will update 
 def drive(left, right, cmd):
     global u     #updates velocity of wheels
-    global X,X_SE,xlog,ylog,index    #updates graph
+    global X,X_SE,xlog,ylog,SElogindex    #updates graph
     global Z
     global SE
     #global running                              #indicates that car is running
@@ -170,7 +170,7 @@ def drive(left, right, cmd):
     #actual state:
     f3.write(str(X[0][0])+","+str(X[1][0])+","+str(X[2][0])+"\n")
     #SE state logging
-    fSE.write(str(X[0][0])+","+str(X[1][0])+","+str(X[2][0])+"\n")
+    fSE.write(str(X_SE[0][0])+","+str(X_SE[1][0])+","+str(X_SE[2][0])+"\n")
   
 
 def forward(event):
@@ -196,7 +196,7 @@ def button_release(event):
 #prompt for starting positions
 initialize()
 #initializing State Estimator object
-SE = StateEstimator(X_SE)
+SE = StateEstimator()
 #create file to log data
 f1 = open('sim_out.txt','w')
 f2 = open('sim_in.txt','w')

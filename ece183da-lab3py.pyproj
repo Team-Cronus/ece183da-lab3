@@ -5,7 +5,7 @@
     <ProjectGuid>23405dce-b49b-4686-8502-f98b42edf366</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>simulation\simulation.py</StartupFile>
+    <StartupFile>simulation\StateEstimator.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,6 +26,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="rrt\RRT and data output\RRT.py" />
+    <Compile Include="simulation\class1.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="simulation\StateEstimator.py">
       <SubType>Code</SubType>
     </Compile>

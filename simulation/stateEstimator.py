@@ -13,9 +13,7 @@ class StateEstimator:
     dt = 0.25
 
     h_k = H_k = A = P_k_minus = u_k = Q_k = x_k_k_minus =obsv = F_k = R_k = Q_k = None
-    def __init__(self, inputs, observations, state):
-        h_k = geth()
-        
+    def __init__(self):      
         #P_kminus is the covariance matrix
         self.P_k_minus = np.array(
                            [[0,0,0,0],
@@ -33,8 +31,7 @@ class StateEstimator:
             [[0.3909,0,0],
              [0,0.4664,0],
              [0,0,0.1749]])
-        #state transition matrix
-        rad = math.radians(x_k_k_minus[2][0])
+
         
     
     ########################    
@@ -48,12 +45,12 @@ class StateEstimator:
         thetad = state[3][0]
 
         #previous estimated state
-        x_k_minus = np.array([x0],[y0],[theta],[thetad])
+        x_k_minus = np.array([[x0],[y0],[theta],[thetad]])
 
         #get inputs and form an input matrix
         #my_print('Enter pwm right')
         pwmR = inputs[1][0]
-        #my_print('Enter pwm left')
+        #my_print('Enter pwm left')s
         pwmL = inputs[0][0]
 
         self.u_k = np.array([[pwmR],[pwmL]])
@@ -62,21 +59,23 @@ class StateEstimator:
         self.A = np.array(
                     [[1,0,0,0],
                      [0,1,0,0],
-                     [0,0,1,dt],
+                     [0,0,1,self.dt],
                      [0,0,0,0]])
         #B is the transition matrix for inputs
         self.B = np.array(
                     [[0.5*math.cos(theta), 0.5*math.cos(theta)],
                      [0.5*math.sin(theta), 0.5*math.sin(theta)],
                      [0,0],
-                     [-1/(2*car_width), 1/(2*car_width)]])
+                     [-1/(2*self.car_width), 1/(2*self.car_width)]])
+        #predicted state estimate
+        self.x_k_k_minus = np.matmul(self.A,x_k_minus) + np.matmul(self.B,self.u_k)
+        #state transition matrix
+        rad = math.radians(self.x_k_k_minus[2][0])
         self.F_k = np.array(
-                     [[1,0,-(self.u_k[0][0]+self.u_k[1][0])*math.sin(rad)*dt/2,0],
-                      [0,1,(self.u_k[0][0]+self.u_k[1][0])*math.cos(rad)*dt/2,0],
+                     [[1,0,-(self.u_k[0][0]+self.u_k[1][0])*math.sin(rad)*self.dt/2,0],
+                      [0,1,(self.u_k[0][0]+self.u_k[1][0])*math.cos(rad)*self.dt/2,0],
                       [0,0,1,0],
                       [0,0,0,0]])
-        #predicted state estimate
-        self.x_k_k_minus = np.matmul(self.A,self.x_k_minus) + np.matmul(self.B,self.u_k)
         #predicted covariance estimate
         self.P_k_minus = np.matmul(np.transpose(self.F_k),np.matmul(self.F_k,self.P_k_minus))
 
@@ -121,13 +120,13 @@ class StateEstimator:
         y = self.x_k_k_minus[1][0]
         radd  = math.radians(x_k_k_minus[3][0])
         #calculating possible distances for front sensor
-        d1 = (XMAX - x) / math.cos(rad)
-        d2 = (YMAX - y) / math.sin(rad)
+        d1 = (self.XMAX - x) / math.cos(rad)
+        d2 = (self.YMAX - y) / math.sin(rad)
         d3 = x / math.cos(rad + math.pi)
         d4 = y / math.sin(rad + math.pi)
         #calculating possible distances for right sensor
-        l1 = (XMAX - x) / math.sin(rad)
-        l2 = (YMAX - y) / math.cos(rad + math.pi)
+        l1 = (self.XMAX - x) / math.sin(rad)
+        l2 = (self.YMAX - y) / math.cos(rad + math.pi)
         l3 = x / math.sin(rad + math.pi)
         l4 = y / math.cos(rad)
         #get second least distance for both front and right distances
@@ -140,14 +139,14 @@ class StateEstimator:
             h = np.array([[d1/x,0,0,0],
                           [0,0,0,0],
                           [0,0,1,0]])
-            H = np.array([[-1/(math.cos(rad)),0,0,(XMAX-x_k_k_minus[0][0])*math.sin(rad)/(math.cos(rad)**2)],
+            H = np.array([[-1/(math.cos(rad)),0,0,(self.MAX-x_k_k_minus[0][0])*math.sin(rad)/(math.cos(rad)**2)],
                           [0,0,0,0],
                           [0,0,0,0]])
         elif s1 == d2:
             h = np.array([[0,d2/y,0,0],
                           [0,0,0,0],
                           [0,0,1,0]])
-            H = np.array([[0,-1/math.sin(rad),0,(-1)*(YMAX-x_k_k_minus[1][0])*math.cos(rad)/(math.cos(rad)**2)],
+            H = np.array([[0,-1/math.sin(rad),0,(-1)*(self.YMAX-x_k_k_minus[1][0])*math.cos(rad)/(math.cos(rad)**2)],
                           [0,0,0,0],
                           [0,0,0,0]])
         elif s1 == d3:
@@ -170,7 +169,7 @@ class StateEstimator:
                           [l1/x,0,0,0],
                           [0,0,0,0]]))
             H = np.add(H,np.array([[0,0,0,0],
-                          [(-1/math.sin(rad)),0,0,(-1)*(XMAX-x_k_k_minus[0][0])*math.cos(rad)/(math.sin(rad+math.pi)**2)],
+                          [(-1/math.sin(rad)),0,0,(-1)*(self.XMAX-x_k_k_minus[0][0])*math.cos(rad)/(math.sin(rad+math.pi)**2)],
                           [0,0,0,0]]))
         elif s2 == l2:
             h = np.add(h,np.array([
@@ -178,7 +177,7 @@ class StateEstimator:
                           [0,l2/y,0,0],
                           [0,0,0,0]]))
             H = np.add(H,np.array([[0,0,0,0],
-                          [0,1/math.cos(rad + math.pi),0,(YMAX-x_k_k_minus[1][0])*math.sin(rad+math.pi)/(math.cos(rad+math.pi)**2)],
+                          [0,1/math.cos(rad + math.pi),0,(self.YMAX-x_k_k_minus[1][0])*math.sin(rad+math.pi)/(math.cos(rad+math.pi)**2)],
                           [0,0,0,0]]))
         elif s2 == l3:
             h = np.add(h,np.array([[0,0,0,0],
@@ -197,3 +196,13 @@ class StateEstimator:
                           [0,0,0,0]]))
             
         return h,H
+
+
+def main():
+    X = [[0],[0],[0],[0]]
+    SE = StateEstimator()
+    SE.predict([[1.25],[1.25]],[[0],[0],[0],[0]])
+
+
+if __name__ == '__main__':
+    main()
