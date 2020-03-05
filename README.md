@@ -1,10 +1,19 @@
-# lab1 and other labs to come
+# LAB 3: RRT
 
-Although the repository is titled as lab1, it will be used for the next labs as well. Our files are organized between
-state estimator which runs in matlab, simulation which runs in python, and the robot in arduino. We seperate them through
-seperate folders to maintain neatness and order. We also seperate some data into the data folder. Currently we have a main.py 
-program but it currently does nothing atm and is there for future development as a program to redirect inputs and outputs between
-state estimator and simulation and possibly the arduino as well. 
+# RRT Implementation 
+In this lab we focus on implementing a rapidly-exploring random tree (RRT) algorithm. 
+We have previous files from other labs in this repository as well as they are necessary
+for the project to work. The main bulk of the RRT exists in the rrt folder. In the 
+rrt folder you can find three other folders that seperate images of situations considered
+in our program and how we handle them, along with the actual code implementation.
+You can find the actual RRT code in the "new RRT code and data output" folder. The RRT.py
+file is the script used to generate a path from the starting point and the goal. In this 
+directory we also have images showing the results our paths. These images will be necessary
+to showcase a proper path as it can take up to 30 minutes to generate a full and proper tree.
 
-there are also visual studios files that can be ignored. They are simply there as we used visual studios as a text editor for
-editing files and coding programs.
+# Other Folders and Files
+We also have a video of our robot car pathing through a created plan in the video folder.
+The simulation folder contains the main simulation code and also an updated state estimator
+implementation in python as opposed to our previous matlab version. You can run the 
+simulation.py script to run a simulation with EKF. 
+
