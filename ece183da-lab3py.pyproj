@@ -5,7 +5,7 @@
     <ProjectGuid>23405dce-b49b-4686-8502-f98b42edf366</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>module1.py</StartupFile>
+    <StartupFile>rrt\RRT and data output\RRT.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,13 +26,44 @@
     <Compile Include="module1.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="rrt\RRT and data output\RRT.py" />
     <Compile Include="stateEstimator.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="simulation\simulation.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="rrt\" />
+    <Folder Include="rrt\figure of obstacle detection\" />
+    <Folder Include="rrt\Referenceú║figure of rewiring algorithm\" />
+    <Folder Include="rrt\RRT and data output\" />
     <Folder Include="simulation\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="rrt\figure of obstacle detection\step1 check collision.jpg" />
+    <Content Include="rrt\figure of obstacle detection\step2.1 check collion.jpg" />
+    <Content Include="rrt\figure of obstacle detection\step2.2 check collion.jpg" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step1.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step10.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step11.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step12.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step13.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step14.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step15.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step16.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step17.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step18.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step19.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step2.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step3.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step4.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step5.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step6.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step7.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step8.png" />
+    <Content Include="rrt\Referenceú║figure of rewiring algorithm\step9.png" />
+    <Content Include="rrt\RRT and data output\coordinateOfPath.png" />
+    <Content Include="rrt\RRT and data output\rrtPath.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
