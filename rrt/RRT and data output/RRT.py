@@ -325,6 +325,7 @@ class RRT(object):
             path.append([node.x, node.y])
             last_index = node.parent
         f.write(str(self.end.x) + " " + str(self.end.y))
+        f.flush()
         path.append([self.start.x, self.start.y])
         f.close()
         return path
