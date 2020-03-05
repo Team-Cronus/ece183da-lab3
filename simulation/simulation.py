@@ -1,10 +1,10 @@
+from stateEstimator import StateEstimator
 import tkinter
 import math
 import time as t1
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from simulation import StateEstimator
 import random
 
 STOP = False
@@ -16,8 +16,8 @@ u = [[0.0],                                       #u vector holds our input valu
 t = .25                                         #t is a variable that holds a simulated time that considers
                                                 #   the time that a velocity is acting on a wheel
 dist_between_wheels = 1                         #distance between center of car and wheels
-X = [[0.0],[0.0],[0.0],[0.0],[0.0],[0.0]]       #X is a column vector [xb,yb,theta,x',y',theta']
-X_SE = None                                     #copy of X for the state estimator
+X = [[0.0],[0.0],[0.0],[0.0]]       #X is a column vector [xb,yb,theta,x',y',theta']
+X_SE = [[0.0],[0.0],[0.0],[0.0]]                                    #copy of X for the state estimator
 init_log_size = 500                             #initial size of the logging arrays
 xlog = [None]*init_log_size                     #create three arrays to store the values for state column vector 
                                                 #for logging and graphing purposes
@@ -35,7 +35,7 @@ v = 1.25                                         #v is the speed of the wheels i
 
 #initializes the starting point of the robot where (0,0) is the bottom left corner
 def initialize():
-    global X
+    global X, X_SE
     #gather initial inputs to realize where the car is
     print('Enter initial x position: ')
     sys.stdout.flush()
@@ -47,43 +47,49 @@ def initialize():
     sys.stdout.flush()
     theta = float(input())
     X = np.array([[xb],[yb],[theta],[0]])
+    print(X)
     X_SE = np.array([[xb],[yb],[theta],[0]])
 
 #gets noise for inputs
 def get_noise_in():
-    a = np.array([[random.gauss(0,1)],
-                   [random.gauss(0,1)],
-                   [random.gauss(0,1)],
-                   [random.gauss(0,1)]])
+    a = np.array([[random.gauss(0,0.01)],
+                   [random.gauss(0,.01)],
+                   [random.gauss(0,0.02)],
+                   [random.gauss(0,0.02)]])
     return a
 #gets noise for observations
 def get_noise_ob():
-    a = np.array([[random.gauss(0,0.2)],
-                   [random.gauss(0,0.2)],
-                   [random.gauss(0,0.4)]])
+    a = np.array([[random.gauss(0,0.01)],
+                   [random.gauss(0,0.01)],
+                   [random.gauss(0,0.02)]])
     return a
 
 def state_update():
     global X, u
     #global xlog, ylog, index
-    X[2][0] = math.radians(X[2][0])
-    X[5][0] = math.radians(X[5][0])
+    rad = X[2][0]
+    rad = math.radians(rad)
+    X[2][0] = rad
     A = [[1,0,0,0],                     #A is the state transition matrix that updates the x, y, and
          [0,1,0,0],                      #theta positioning by adding the previous velocoties multiplied my time
          [0,0,1,t],
-         [0,0,0,0]],
+         [0,0,0,0]]
     #B is a state transition matrix that takes our input and 
      #converts into x,y,and angular velocities
     B = [[0.5*math.cos(X[2][0]),0.5*math.cos(X[2][0])], 
          [0.5*math.sin(X[2][0]),0.5*math.sin(X[2][0])],
          [0,0],
-         [-1 /(2*dist_between_wheels),1/(2*dist_between_wheels)]]
+         [1 /(2*dist_between_wheels),-1/(2*dist_between_wheels)]]
     Bu = np.reshape(np.matmul(B,u),(4,1))                                   #compute the value of B*u for state update
     Ax = np.matmul(A,X)                                                     #compute value of A*x for state update
-    Noise = get_noise()                                                     #get noise from gauss distribution
-    X = np.add(np.add(Ax,Bu),Noise)                                         #compute state update with noise
-    X[5][0] = math.degrees(X[5][0])                                         #convert angular velocity for easier reading
-    X[2][0] = math.degrees(X[2][0])
+    Noise = get_noise_in()
+
+    #get noise from gauss distribution
+    X = np.add(np.add(Ax,Bu),Noise) 
+    #compute state update with noise
+    deg = X[2][0]
+    deg = math.degrees(deg)
+    X[2][0] = deg
     if X[2][0] <= 0:                                                    #keeps the angle constrained between 0 and 360
         X[2][0] += 360.0
     elif X[2][0] >= 360.0:
@@ -115,8 +121,6 @@ def getD():
     s1 = sorted([d1,d2,d3,d4])[2]
     s2 = sorted([l1,l2,l3,l4])[2]
     
-
-        
     return s1,s2
 
 #output functions
@@ -137,7 +141,7 @@ def output():
 #drive function will update 
 def drive(left, right, cmd):
     global u     #updates velocity of wheels
-    global X,X_SE,xlog,ylog,SElogindex    #updates graph
+    global X,X_SE,xlog,ylog,SElog,index    #updates graph
     global Z
     global SE
     #global running                              #indicates that car is running
@@ -146,7 +150,6 @@ def drive(left, right, cmd):
     sys.stdout.flush()
     u[1][0] = left
     u[0][0] = right
-
     #Generate predicted states inside State Estimator
     SE.predict(u,X_SE)
     #generate simulated actual state and output
@@ -157,9 +160,14 @@ def drive(left, right, cmd):
     #log 
     xlog[index] = X[0][0]
     ylog[index] = X[1][0]
+    xSElog[index] = X_SE[0][0]
+    ySElog[index] = X_SE[1][0]
     line.set_marker(marker=(3,0,X[2][0]+10))
     line.set_xdata(xlog)
     line.set_ydata(ylog)
+    line2.set_marker(marker=(3,0,X_SE[2][0]+10))
+    line2.set_xdata(xSElog)
+    line2.set_ydata(ySElog)
     fig.canvas.draw()
     index += 1
     #log into file into csv
@@ -237,13 +245,14 @@ ex.grid(column=8,row=1)
 plt.ion()
 fig = plt.figure()
 ax = fig.add_subplot(111)
-line, = ax.plot(xlog,ylog, marker=(3,0,X[2][0]))
+line, = ax.plot(xlog,ylog, marker=(3,0,X[2][0]), label='Actual Position')
+line2, = ax.plot(xSElog,ySElog, marker=(3,0,X_SE[2][0]), label='Estimated Sate')
 plt.xlabel('x(cm)')
 plt.ylabel('y(cm)')
 plt.title('State Estimation')
 plt.ylim(0,YMAX)                          #set the dimensions to be 0 to 50 cm
 plt.xlim(0,XMAX)
-
+plt.legend( loc='upper left')
 window.mainloop()
 
 plt.close(fig)
