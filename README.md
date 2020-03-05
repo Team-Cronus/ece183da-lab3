@@ -12,7 +12,8 @@ directory we also have images showing the results our paths. These images will b
 to showcase a proper path as it can take up to 30 minutes to generate a full and proper tree.
 
 # Other Folders and Files
-We also have a video of our robot car pathing through a created plan in the video folder.
+We also have a video of our robot car pathing through a created plan in the demo folder. In 
+the video we use black tape to indicate the obstacles so we do not interrupt our observations.
 The simulation folder contains the main simulation code and also an updated state estimator
 implementation in python as opposed to our previous matlab version. You can run the 
 simulation.py script to run a simulation with EKF. 
